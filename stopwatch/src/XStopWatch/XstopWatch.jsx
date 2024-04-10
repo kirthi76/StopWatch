@@ -1,51 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect,useRef,useState } from 'react';
+
 
 const XstopWatch = () => {
-    const [timer, setTimer] = useState(0);
-    const [isRunning, setIsRunning] = useState(false);
+  const [timer, setTimer] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
 
-
-    useEffect(()=>{
-
-        let timerId;
-        if(isRunning){
-             timerId = setInterval(() => {
-            
-                setTimer( timer+1);
-                
-            }, 1000);
-        }
-       
-        
-        return ()=> {clearInterval(timerId);
-    
-    }    }, [isRunning,timer])
-
+  const timerId = useRef(null);
+  useEffect(()=>{
       
+      timerId.current = setInterval(() => {
+          if(isRunning){
+            setTimer(timer=> timer+1);
+          }
+      }, 1000);
+      
+      return ()=> clearInterval(timerId.current)
+  }, [isRunning])
 
-    const formatTime = secs=>{
-        const min = Math.floor(secs/60);
-        let remaniningSecs = secs % 60;
-        return `${min}:${remaniningSecs<10 ? "0":""} ${remaniningSecs}`
-    }
-
-    
-  const startStop = () => {
-    setIsRunning(!isRunning);
-  };
-
-  const reset = () => {
-    setTimer(0);
+  const reset = ()=>{
     setIsRunning(false);
-  };
-    return (
-        <div>
-            <h1>Stopwatch</h1>
-            <p>Time: {formatTime(timer)}</p>
-            <button onClick={startStop}>{isRunning ? 'Stop' : 'Start'}</button>
-            <button onClick={reset}>Reset</button>
-        </div>
-    );
+    setTimer(0)
+  }
+
+  const formatTime  = seconds=>{
+      let min = Math.floor(seconds/60);
+      let remaniningSecs  = seconds % 60;
+
+      if(!seconds) {
+          min = 0;
+          remaniningSecs = 0;
+      }
+      
+      let sec = remaniningSecs > 9 ? remaniningSecs : `0${remaniningSecs}`;
+      return `${min}:${sec}`
+  }
+  return (
+      <div>
+          <h1>Stopwatch</h1>
+          <p>Time: {formatTime (timer)}</p>
+          <button onClick={()=> setIsRunning(prev=> !prev)}>{isRunning ? "Stop" : "Start"}</button>
+          <button onClick={reset}>Reset</button>
+      </div>
+  );
 };
+
 
 export default XstopWatch;
